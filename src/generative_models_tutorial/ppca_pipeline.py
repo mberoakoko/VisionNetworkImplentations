@@ -1,5 +1,6 @@
 from typing import NamedTuple
 
+import equinox as eqx
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -21,6 +22,50 @@ class PPCAStateItern(NamedTuple):
     d_w: float 
     d_sig: float
 
+class NegativeEloboLoss(eqx.Module):
+    W: Array
+    log_sigma2: Array 
+
+    def __init__(self, W: Array, log_sigma2: Array):
+        self.W = W 
+        self.log_sigma2 = log_sigma2 
+
+    def __call__(self, X_centered: Array):
+        """Computes the negative ELBO to be minimized by Optax."""
+        W = self.W 
+
+        # Recover positive variance from log-space parameter
+        sigma2 = jnp.exp(self.log_sigma2)
+        N, D = X_centered.shape
+        latent_dim = W.shape[1]
+
+        # Forward pass to get posterior expectations (E-step equivalent)
+        m = W.T @ W + sigma2 * jnp.eye(latent_dim)
+        m_inv = jnp.linalg.inv(m)
+
+
+        E_z = X_centered @ W @ m_inv 
+        E_zzT = sigma2 * m_inv + (E_z.T @ E_z) / N 
+
+        # 1. Expected Log-Likelihood
+        tr_W_W_EzzT = jnp.trace(W.T @ W @ E_zzT)
+        expected_sq_err = (jnp.mean(jnp.sum(X_centered**2, axis=1)) 
+                       - 2.0 * jnp.mean(jnp.sum(X_centered * (E_z @ W.T), axis=1)) 
+                       + tr_W_W_EzzT)
+
+        expected_log_lik = -0.5 * D * (jnp.log(2.0 * jnp.pi) + jnp.log(sigma2)) - (0.5 / sigma2) * expected_sq_err
+
+        # 2. KL Divergence
+        Sigma_q = sigma2 * m_inv
+        trace_term = jnp.trace(Sigma_q)
+        mean_sq_term = jnp.mean(jnp.sum(E_z**2, axis=1))
+        log_det_Sigma = jnp.linalg.slogdet(Sigma_q)[1]
+
+        kl_div = 0.5 * (trace_term + mean_sq_term - latent_dim - log_det_Sigma)
+
+        # Return negative ELBO for minimization
+        elbo = expected_log_lik - kl_div
+        return -elbo
 
 def display_results(X_sub: np.ndarray, X_recon: Array, y_sub: np.ndarray , Z: Array) -> None :
     fig, axes = plt.subplots(2, 5, figsize=(15, 6))
@@ -113,6 +158,9 @@ def ppca_em_step_fit(X: Array, latent_dim: int =2, max_iters: int  = 1000, tol: 
         return PPCAStateItern( W_new, mu,  sigma2_new, curr_iter + 1, diff_W, diff_sigma2 ) 
 
     return jax.lax.while_loop(cond_func, body_func, init_state)
+
+
+
 
 
 @jax.jit 

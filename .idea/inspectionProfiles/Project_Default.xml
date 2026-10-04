@@ -1,0 +1,175 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyCompatibilityInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ourVersions">
+        <value>
+          <list size="4">
+            <item index="0" class="java.lang.String" itemvalue="3.14" />
+            <item index="1" class="java.lang.String" itemvalue="3.15" />
+            <item index="2" class="java.lang.String" itemvalue="3.13" />
+            <item index="3" class="java.lang.String" itemvalue="3.12" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="action-msgs" />
+          <option value="action-tutorials-py" />
+          <option value="actionlib-msgs" />
+          <option value="ament-cmake-test" />
+          <option value="ament-copyright" />
+          <option value="ament-cppcheck" />
+          <option value="ament-cpplint" />
+          <option value="ament-flake8" />
+          <option value="ament-index-python" />
+          <option value="ament-lint" />
+          <option value="ament-lint-cmake" />
+          <option value="ament-package" />
+          <option value="ament-pep257" />
+          <option value="ament-uncrustify" />
+          <option value="ament-xmllint" />
+          <option value="angles" />
+          <option value="builtin-interfaces" />
+          <option value="composition-interfaces" />
+          <option value="cv-bridge" />
+          <option value="demo-nodes-py" />
+          <option value="diagnostic-msgs" />
+          <option value="example-interfaces" />
+          <option value="examples-rclpy-executors" />
+          <option value="examples-rclpy-minimal-action-client" />
+          <option value="examples-rclpy-minimal-action-server" />
+          <option value="examples-rclpy-minimal-client" />
+          <option value="examples-rclpy-minimal-publisher" />
+          <option value="examples-rclpy-minimal-service" />
+          <option value="examples-rclpy-minimal-subscriber" />
+          <option value="geometry-msgs" />
+          <option value="image-geometry" />
+          <option value="interactive-markers" />
+          <option value="laser-geometry" />
+          <option value="launch" />
+          <option value="launch-ros" />
+          <option value="launch-testing" />
+          <option value="launch-testing-ros" />
+          <option value="launch-xml" />
+          <option value="launch-yaml" />
+          <option value="lifecycle-msgs" />
+          <option value="logging-demo" />
+          <option value="map-msgs" />
+          <option value="message-filters" />
+          <option value="nav-msgs" />
+          <option value="osrf-pycommon" />
+          <option value="pcl-msgs" />
+          <option value="pendulum-msgs" />
+          <option value="python-qt-binding" />
+          <option value="qt-dotgraph" />
+          <option value="qt-gui" />
+          <option value="qt-gui-cpp" />
+          <option value="qt-gui-py-common" />
+          <option value="quality-of-service-demo-py" />
+          <option value="rcl-interfaces" />
+          <option value="rclpy" />
+          <option value="rcutils" />
+          <option value="resource-retriever" />
+          <option value="rmw-dds-common" />
+          <option value="rmw-test-fixture-implementation" />
+          <option value="ros2action" />
+          <option value="ros2bag" />
+          <option value="ros2bag-mcap-cli" />
+          <option value="ros2bag-sqlite3-cli" />
+          <option value="ros2cli" />
+          <option value="ros2component" />
+          <option value="ros2doctor" />
+          <option value="ros2interface" />
+          <option value="ros2launch" />
+          <option value="ros2lifecycle" />
+          <option value="ros2multicast" />
+          <option value="ros2node" />
+          <option value="ros2param" />
+          <option value="ros2pkg" />
+          <option value="ros2run" />
+          <option value="ros2service" />
+          <option value="ros2topic" />
+          <option value="rosbag2-interfaces" />
+          <option value="rosbag2-py" />
+          <option value="rosgraph-msgs" />
+          <option value="rosidl-adapter" />
+          <option value="rosidl-cli" />
+          <option value="rosidl-cmake" />
+          <option value="rosidl-generator-c" />
+          <option value="rosidl-generator-cpp" />
+          <option value="rosidl-generator-py" />
+          <option value="rosidl-generator-type-description" />
+          <option value="rosidl-parser" />
+          <option value="rosidl-pycommon" />
+          <option value="rosidl-runtime-py" />
+          <option value="rosidl-typesupport-c" />
+          <option value="rosidl-typesupport-cpp" />
+          <option value="rosidl-typesupport-fastrtps-c" />
+          <option value="rosidl-typesupport-fastrtps-cpp" />
+          <option value="rosidl-typesupport-introspection-c" />
+          <option value="rosidl-typesupport-introspection-cpp" />
+          <option value="rpyutils" />
+          <option value="rqt-action" />
+          <option value="rqt-bag" />
+          <option value="rqt-bag-plugins" />
+          <option value="rqt-console" />
+          <option value="rqt-graph" />
+          <option value="rqt-gui" />
+          <option value="rqt-gui-py" />
+          <option value="rqt-msg" />
+          <option value="rqt-plot" />
+          <option value="rqt-publisher" />
+          <option value="rqt-py-common" />
+          <option value="rqt-py-console" />
+          <option value="rqt-reconfigure" />
+          <option value="rqt-service-caller" />
+          <option value="rqt-shell" />
+          <option value="rqt-srv" />
+          <option value="rqt-topic" />
+          <option value="rviz-resource-interfaces" />
+          <option value="sensor-msgs" />
+          <option value="sensor-msgs-py" />
+          <option value="service-msgs" />
+          <option value="shape-msgs" />
+          <option value="sros2" />
+          <option value="statistics-msgs" />
+          <option value="std-msgs" />
+          <option value="std-srvs" />
+          <option value="stereo-msgs" />
+          <option value="teleop-twist-keyboard" />
+          <option value="tf2-geometry-msgs" />
+          <option value="tf2-kdl" />
+          <option value="tf2-msgs" />
+          <option value="tf2-py" />
+          <option value="tf2-ros-py" />
+          <option value="tf2-sensor-msgs" />
+          <option value="tf2-tools" />
+          <option value="topic-monitor" />
+          <option value="trajectory-msgs" />
+          <option value="turtlesim-msgs" />
+          <option value="type-description-interfaces" />
+          <option value="unique-identifier-msgs" />
+          <option value="visualization-msgs" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+          <option value="N803" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="pydrake.common.value.Value" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
