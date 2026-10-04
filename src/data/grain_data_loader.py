@@ -78,6 +78,22 @@ def make_mnist_loader(images_file: str, labels_file: str, batch_size: int, is_tr
     # Compile execution map down to a prefetched multi-threaded stream loop
     return dataset.to_iter_dataset()
 
+def get_train_loader():
+    return make_mnist_loader(
+        images_file=os.path.join(DATA_DIR, "train-images-idx3-ubyte.gz"),
+        labels_file=os.path.join(DATA_DIR, "train-labels-idx1-ubyte.gz"),
+        batch_size=64,
+        is_train=True
+    )
+
+def get_test_loader():
+    return make_mnist_loader(
+        images_file=os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz"),
+        labels_file=os.path.join(DATA_DIR, "t10k-labels-idx1-ubyte.gz"),
+        batch_size=64,
+        is_train=False,
+    )
+
 def main():
 
     DATA_DIR = ( pathlib.Path(__file__).parent ).resolve()  / "store/mnist_data/"
