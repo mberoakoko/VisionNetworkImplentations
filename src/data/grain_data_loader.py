@@ -6,6 +6,7 @@ import grain.python as grain
 import numpy as np
 from loguru import logger
 
+DATA_DIR = ( pathlib.Path(__file__).parent ).resolve()  / "store/mnist_data/"
 
 class LocalMNISTDataSource(grain.RandomAccessDataSource):
     """Idiomatic Grain Source for local OSSCI idx-ubyte.gz files."""
