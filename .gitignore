@@ -2,3 +2,11 @@
 .vonv
 **/__pycache__/
 *.pyc
+/src/data/store/mnist_data/t10k-images-idx3-ubyte.gz
+/src/data/store/t10k-images-idx3-ubyte.gz
+/src/data/store/mnist_data/t10k-labels-idx1-ubyte.gz
+/src/data/store/t10k-labels-idx1-ubyte.gz
+/src/data/store/mnist_data/train-images-idx3-ubyte.gz
+/src/data/store/train-images-idx3-ubyte.gz
+/src/data/store/mnist_data/train-labels-idx1-ubyte.gz
+/src/data/store/train-labels-idx1-ubyte.gz
