@@ -6,7 +6,8 @@ import grain.python as grain
 import numpy as np
 from loguru import logger
 
-DATA_DIR = ( pathlib.Path(__file__).parent ).resolve()  / "store/mnist_data/"
+DATA_DIR = pathlib.Path(__file__).parent.resolve() / "store/mnist_data/"
+DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 class LocalMNISTDataSource(grain.RandomAccessDataSource):
     """Idiomatic Grain Source for local OSSCI idx-ubyte.gz files."""
@@ -96,23 +97,12 @@ def get_test_loader():
 
 def main():
 
-    DATA_DIR = ( pathlib.Path(__file__).parent ).resolve()  / "store/mnist_data/"
+
     print(DATA_DIR)
     assert DATA_DIR.exists(), "given path does not exist"
     DATA_DIR = str(DATA_DIR)
-    train_loader = make_mnist_loader(
-        images_file=os.path.join(DATA_DIR, "train-images-idx3-ubyte.gz"),
-        labels_file=os.path.join(DATA_DIR, "train-labels-idx1-ubyte.gz"),
-        batch_size=64,
-        is_train=True
-    )
-
-    test_loader = make_mnist_loader(
-        images_file=os.path.join(DATA_DIR, "t10k-images-idx3-ubyte.gz"),
-        labels_file=os.path.join(DATA_DIR, "t10k-labels-idx1-ubyte.gz"),
-        batch_size=64,
-        is_train=False
-    )
+    train_loader = get_train_loader()
+    test_loader = get_test_loader()
 
     # Test execution inside your training loop
     for batch in train_loader:
