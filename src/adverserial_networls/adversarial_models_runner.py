@@ -77,6 +77,70 @@ def dummy_training_run():
 
     # Launch GUI Visualizer
     plot_interactive_batch(model, test_batch.images, pert, test_batch.labels)
+    
+    
+def real_training_run():
+    key = jax.random.PRNGKey(42)
+
+    # 1. Hyperparameters & Model Setup
+    num_classes = 10
+    learning_rate = 1e-3
+    num_epochs = 20
+
+    model = ConvolutionalNeuralNetwork(num_classes=num_classes, rng_key=key)
+    optimizer = optax.adam(learning_rate)
+    opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
+
+    print("--- Starting Standard Training with Grain ---")
+    train_loader = get_train_loader()
+
+    for epoch in range(1, num_epochs + 1):
+        total_loss = 0.0
+        num_batches = 0
+
+        # Wrap Grain iterator with the adapter
+        for batch in GrainDatasetAdapter(train_loader):
+            model, opt_state, loss_val = standard_train_step(
+                model, opt_state, optimizer, batch.images, batch.labels
+            )
+            total_loss += float(loss_val)
+            num_batches += 1
+
+        print(f"Epoch {epoch:2d} | Avg Loss: {total_loss / num_batches:.4f}")
+
+    print("\n--- Starting Adversarial Fine-Tuning with Grain ---")
+    adv_step_fn = adversarial_train_step_builder(pgd_attack)
+
+    for epoch in range(1, num_epochs + 1):
+        total_loss = 0.0
+        num_batches = 0
+
+        for batch in GrainDatasetAdapter(train_loader):
+            model, opt_state, loss_val = adv_step_fn(
+                model, opt_state, optimizer, batch.images, batch.labels, epsilon=0.1
+            )
+            total_loss += float(loss_val)
+            num_batches += 1
+
+        print(f"Epoch {epoch:2d} | Avg Adv Loss: {total_loss / num_batches:.4f}")
+
+    # 3. Final Evaluation on Test Set
+    test_loader = get_test_loader()
+    test_batch = adapt_grain_batch(next(iter(test_loader)))
+
+    pert = pgd_attack(model, test_batch.images, test_batch.labels, epsilon=0.1)
+
+    clean_loss, clean_acc = evaluate_batch(model, test_batch.images, test_batch.labels)
+    adv_loss, adv_acc = evaluate_batch(
+        model, test_batch.images + pert, test_batch.labels
+    )
+
+    print("\nFinal Test Evaluation:")
+    print(f"  Clean Accuracy:       {clean_acc:.1%}")
+    print(f"  Adversarial Accuracy: {adv_acc:.1%}")
+
+    # Launch GUI Visualizer on test batch
+    plot_interactive_batch(model, test_batch.images, pert, test_batch.labels)
 
 
 
