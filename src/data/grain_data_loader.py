@@ -95,6 +95,36 @@ def get_test_loader():
         is_train=False,
     )
 
+
+class ImageBatch(NamedTuple):
+    images: Array  # Shape: (B, 1, H, W)
+    labels: Array  # Shape: (B,)
+
+
+def adapt_grain_batch(batch: dict) -> ImageBatch:
+    """Converts a Grain dictionary batch into a PyTree-compatible ImageBatch.
+
+    Transforms images from NHWC (B, H, W, 1) to NCHW (B, 1, H, W) as expected by Equinox Conv2d.
+    """
+    raw_images = jnp.asarray(batch["image"])  # Shape: (B, H, W, 1)
+    raw_labels = jnp.asarray(batch["label"])  # Shape: (B,)
+
+    # Permute from (B, H, W, C) to (B, C, H, W)
+    nchw_images = jnp.transpose(raw_images, (0, 3, 1, 2))
+
+    return ImageBatch(images=nchw_images, labels=raw_labels)
+
+
+class GrainDatasetAdapter:
+    """Wraps a Grain PyGrain dataset iterator to yield JAX ImageBatch tuples."""
+
+    def __init__(self, grain_loader):
+        self._grain_loader = grain_loader
+
+    def __iter__(self) -> Iterator[ImageBatch]:
+        for batch in self._grain_loader:
+            yield adapt_grain_batch(batch)
+
 def main():
 
 
