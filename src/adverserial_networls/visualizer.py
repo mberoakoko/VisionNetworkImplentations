@@ -1,3 +1,50 @@
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+from matplotlib.widgets import RadioButtons, Slider
+
+
+# 1. Pure Helper Functions
+def _compute_sample_metrics(
+    model, image: jnp.ndarray, pert: jnp.ndarray, label: int
+) -> tuple[int, float, int, float]:
+    """Computes predictions and max confidence probabilities for clean vs perturbed image."""
+    logits_clean = model(image)
+    logits_adv = model(image + pert)
+
+    clean_pred = int(jnp.argmax(logits_clean))
+    adv_pred = int(jnp.argmax(logits_adv))
+
+    clean_prob = float(jax.nn.softmax(logits_clean)[clean_pred])
+    adv_prob = float(jax.nn.softmax(logits_adv)[adv_pred])
+
+    return clean_pred, clean_prob, adv_pred, adv_prob
+
+
+def _setup_figure() -> tuple[plt.Figure, tuple[plt.Axes, ...]]:
+    """Creates the 3-column plot grid for Clean, Perturbation, and Adversarial views."""
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.5))
+    fig.canvas.manager.set_window_title("Adversarial Sample Batch Visualizer")
+    plt.subplots_adjust(bottom=0.22)  # Reserve bottom space for slider & buttons
+    return fig, axes
+
+
+# 2. Rendering Logic
+def _render_panels(
+    axes: tuple[plt.Axes, ...],
+    clean_img: jnp.ndarray,
+    pert_img: jnp.ndarray,
+    metrics: tuple[int, float, int, float],
+    true_label: int,
+):
+    """Renders the image data and metrics onto the axes."""
+    ax_clean, ax_pert, ax_adv = axes
+    clean_pred, clean_prob, adv_pred, adv_prob = metrics
+
+    # Squeeze channel axis for plotting: (1, H, W) -> (H, W)
+    clean_2d = jnp.squeeze(clean_img)
+    pert_2d = jnp.squeeze(pert_img)
+    adv_2d = jnp.squeeze(clean_img + pert_img)
 
     # Clear previous frames
     for ax in axes:
