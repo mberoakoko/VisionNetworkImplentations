@@ -1,9 +1,13 @@
 import gzip
 import os
 import pathlib
+from collections.abc import Iterator
+from typing import NamedTuple
 
 import grain.python as grain
+import jax.numpy as jnp
 import numpy as np
+from jaxtyping import Array
 from loguru import logger
 
 DATA_DIR = pathlib.Path(__file__).parent.resolve() / "store/mnist_data/"
@@ -25,7 +29,7 @@ class LocalMNISTDataSource(grain.RandomAccessDataSource):
 
             # Read all pixels: shape (N, 28, 28)
             logger.info("Reading all image pixels...")
-            self._images = np.frombuffer(f.read(), dicttype=np.uint8).reshape(num_images, rows, cols)
+            self._images = np.frombuffer(f.read(), dtype=np.uint8).reshape(num_images, rows, cols)
 
         # 2. Parse OSSCI custom idx label binary schema
         with gzip.open(labels_path, 'rb') as f:

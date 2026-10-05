@@ -1,3 +1,22 @@
+import equinox as eqx
+import jax.random
+import optax
+
+from adverserial_networls.model import ConvolutionalNeuralNetwork, TestDataGenerator
+from adverserial_networls.train import (
+    adversarial_train_step_builder,
+    evaluate_batch,
+    pgd_attack,
+    run_training_epoch,
+    standard_train_step,
+)
+from adverserial_networls.visualizer import plot_interactive_batch
+from src.data.grain_data_loader import (
+    GrainDatasetAdapter,
+    adapt_grain_batch,
+    get_test_loader,
+    get_train_loader,
+)
 
 
 def attack_loss() -> None:
@@ -145,7 +164,7 @@ def real_training_run():
 
 
 def main():
-    dummy_training_run()
+    real_training_run()
 
 if __name__ == "__main__":
     main()

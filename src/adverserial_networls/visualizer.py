@@ -2,6 +2,9 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RadioButtons, Slider
+import matplotlib
+matplotlib.use("TkAgg")
+plt.style.use("bmh")
 
 
 # 1. Pure Helper Functions
@@ -22,14 +25,43 @@ def _compute_sample_metrics(
 
 
 def _setup_figure() -> tuple[plt.Figure, tuple[plt.Axes, ...]]:
-    """Creates the 3-column plot grid for Clean, Perturbation, and Adversarial views."""
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4.5))
+    """Creates a 4-column plot grid for Clean, Perturbation, Adversarial, and Histogram views."""
+    fig, axes = plt.subplots(1, 4, figsize=(16, 4.5))
     fig.canvas.manager.set_window_title("Adversarial Sample Batch Visualizer")
-    plt.subplots_adjust(bottom=0.22)  # Reserve bottom space for slider & buttons
+    plt.subplots_adjust(bottom=0.22, wspace=0.3)  # Reserve bottom space for controls
     return fig, axes
 
 
-# 2. Rendering Logic
+# 2. Individual Panel Renderers
+def _render_image_panel(ax: plt.Axes, img_2d: jnp.ndarray, title: str, color: str = "black"):
+    """Renders a single 2D image panel."""
+    ax.clear()
+    ax.imshow(img_2d, cmap="gray")
+    ax.set_title(title, color=color, fontsize=10)
+    ax.axis("off")
+
+
+def _render_pert_panel(ax: plt.Axes, pert_2d: jnp.ndarray):
+    """Renders the 2D spatial perturbation map."""
+    ax.clear()
+    ax.imshow(pert_2d, cmap="coolwarm")
+    ax.set_title(f"Perturbation (δ)\nRange: [{pert_2d.min():.2f}, {pert_2d.max():.2f}]", fontsize=10)
+    ax.axis("off")
+
+
+def _render_histogram_panel(ax: plt.Axes, pert_flat: jnp.ndarray):
+    """Renders the pixel perturbation noise distribution histogram."""
+    ax.clear()
+    ax.hist(pert_flat, bins=25, color="steelblue", edgecolor="black", alpha=0.75)
+    ax.axvline(0, color="red", linestyle="--", linewidth=1)
+    ax.set_title("Perturbation Noise Hist", fontsize=10)
+    ax.set_xlabel("Value (δ)", fontsize=8)
+    ax.set_ylabel("Pixel Count", fontsize=8)
+    ax.tick_params(labelsize=8)
+    ax.grid(True, linestyle=":", alpha=0.6)
+
+
+# 3. Panel Compositor
 def _render_panels(
     axes: tuple[plt.Axes, ...],
     clean_img: jnp.ndarray,
@@ -37,75 +69,58 @@ def _render_panels(
     metrics: tuple[int, float, int, float],
     true_label: int,
 ):
-    """Renders the image data and metrics onto the axes."""
-    ax_clean, ax_pert, ax_adv = axes
+    """Renders all 4 panels onto the grid axes."""
+    ax_clean, ax_pert, ax_adv, ax_hist = axes
     clean_pred, clean_prob, adv_pred, adv_prob = metrics
 
-    # Squeeze channel axis for plotting: (1, H, W) -> (H, W)
+    # Squeeze channel axis: (1, H, W) -> (H, W)
     clean_2d = jnp.squeeze(clean_img)
     pert_2d = jnp.squeeze(pert_img)
     adv_2d = jnp.squeeze(clean_img + pert_img)
 
-    # Clear previous frames
-    for ax in axes:
-        ax.clear()
+    # 1. Clean Panel
+    clean_title = f"Clean Image\nTrue: {true_label} | Pred: {clean_pred}\nConf: {clean_prob:.1%}"
+    clean_color = "green" if clean_pred == true_label else "red"
+    _render_image_panel(ax_clean, clean_2d, clean_title, clean_color)
 
-    # Clean Image Panel
-    ax_clean.imshow(clean_2d, cmap="gray")
-    ax_clean.set_title(
-        f"Clean Image\nTrue: {true_label} | Pred: {clean_pred}\nConf: {clean_prob:.1%}",
-        color="green" if clean_pred == true_label else "red",
-    )
+    # 2. Perturbation Spatial Panel
+    _render_pert_panel(ax_pert, pert_2d)
 
-    # Perturbation Panel
-    ax_pert.imshow(pert_2d, cmap="coolwarm")
-    ax_pert.set_title(f"Perturbation (δ)\nRange: [{pert_2d.min():.2f}, {pert_2d.max():.2f}]")
+    # 3. Adversarial Panel
+    adv_title = f"Adversarial Sample\nPred: {adv_pred}\nConf: {adv_prob:.1%}"
+    adv_color = "green" if adv_pred == true_label else "red"
+    _render_image_panel(ax_adv, adv_2d, adv_title, adv_color)
 
-    # Adversarial Image Panel
-    ax_adv.imshow(adv_2d, cmap="gray")
-    ax_adv.set_title(
-        f"Adversarial Sample\nPred: {adv_pred}\nConf: {adv_prob:.1%}",
-        color="green" if adv_pred == true_label else "red",
-    )
-
-    for ax in axes:
-        ax.axis("off")
+    # 4. Noise Histogram Panel
+    _render_histogram_panel(ax_hist, pert_2d.flatten())
 
 
-# 3. Interactive Controller
+# 4. Interactive Controller
 def plot_interactive_batch(
     model,
     images: jnp.ndarray,
     pert: jnp.ndarray,
     labels: jnp.ndarray,
 ):
-    """Spawns an interactive Matplotlib GUI to browse through a batch of adversarial samples.
-
-    Args:
-        model: Equinox CNN model instance.
-        images: Clean batch tensor of shape (B, 1, H, W).
-        pert: Perturbation batch tensor of shape (B, 1, H, W).
-        labels: Ground-truth integer labels array of shape (B,).
-    """
+    """Spawns an interactive Matplotlib GUI to browse through a batch of adversarial samples."""
     batch_size = images.shape[0]
     fig, axes = _setup_figure()
 
     # Define Slider and Radio Button Widgets
-    ax_slider = plt.axes([0.15, 0.08, 0.5, 0.04])
+    ax_slider = plt.axes([0.15, 0.08, 0.45, 0.04])
     slider = Slider(ax_slider, "Sample", 0, batch_size - 1, valinit=0, valfmt="%d")
 
-    ax_radio = plt.axes([0.72, 0.02, 0.18, 0.12])
+    ax_radio = plt.axes([0.68, 0.02, 0.20, 0.12])
     radio = RadioButtons(ax_radio, ["All", "Misclassified", "Correct"], active=0)
 
-    # State holder for interactive filter selection
+    # Filter state
     state = {"indices": list(range(batch_size))}
 
     def _update_indices(_=None):
         mode = radio.value_selected
         indices = []
         for i in range(batch_size):
-            metrics = _compute_sample_metrics(model, images[i], pert[i], int(labels[i]))
-            _, _, adv_pred, _ = metrics
+            _, _, adv_pred, _ = _compute_sample_metrics(model, images[i], pert[i], int(labels[i]))
             true_lbl = int(labels[i])
 
             if mode == "All":
@@ -116,19 +131,17 @@ def plot_interactive_batch(
                 indices.append(i)
 
         state["indices"] = indices if indices else [0]
-        # Re-trigger drawing
         _draw_sample(int(slider.val))
 
     def _draw_sample(idx: int):
         valid_indices = state["indices"]
-        # Map slider value to filtered index
         target_idx = valid_indices[idx % len(valid_indices)]
 
         metrics = _compute_sample_metrics(model, images[target_idx], pert[target_idx], int(labels[target_idx]))
         _render_panels(axes, images[target_idx], pert[target_idx], metrics, int(labels[target_idx]))
         fig.canvas.draw_idle()
 
-    # Attach event callbacks
+    # Callbacks
     slider.on_changed(lambda val: _draw_sample(int(val)))
     radio.on_clicked(_update_indices)
 

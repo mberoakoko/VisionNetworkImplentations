@@ -1,8 +1,9 @@
+import typing
+
 import equinox as eqx
 import jax
-from jaxtyping import Array, PRNGKeyArray
 import jax.numpy as jnp
-import typing
+from jaxtyping import Array, PRNGKeyArray
 
 
 class ConvolutionalNeuralNetwork(eqx.Module):
@@ -32,17 +33,36 @@ class ConvolutionalNeuralNetwork(eqx.Module):
         x = jax.nn.leaky_relu(self.dense_1(x))
         return self.dense_2(x)
 
-class TestTensors(typing.NamedTuple):
-    img_small: Array
-    img_medium: Array
-    img_large: Array
+
+class ImageBatch(typing.NamedTuple):
+    images: Array  # Shape: (batch_size, 1, H, W)
+    labels: Array  # Shape: (batch_size,)
+
+
+class TestDataGenerator(typing.NamedTuple):
+    small: ImageBatch
+    medium: ImageBatch
+    large: ImageBatch
 
     @classmethod
-    def create_default(cls, key: PRNGKeyArray):
-        return TestTensors(
-            img_small = jax.random.uniform(key1, shape=(1, 32, 32)),
-            img_medium = jax.random.uniform(key2, shape=(1, 64, 64)),
-            img_large = jax.random.uniform(key3, shape=(1, 224, 224))
+    def create(
+        cls,
+        key: PRNGKeyArray,
+        batch_size: int = 1,
+        num_classes: int = 10,
+    ) -> "TestDataGenerator":
+        """Generates mock image batches and integer labels for small, medium, and large resolutions."""
+        k1, k2, k3, k4, k5, k6 = jax.random.split(key, 6)
+
+        def make_batch(img_key: PRNGKeyArray, lbl_key: PRNGKeyArray, height: int, width: int) -> ImageBatch:
+            images = jax.random.uniform(img_key, shape=(batch_size, 1, height, width), minval=0.0, maxval=1.0)
+            labels = jax.random.randint(lbl_key, shape=(batch_size,), minval=0, maxval=num_classes)
+            return ImageBatch(images=images, labels=labels)
+
+        return TestDataGenerator(
+            small=make_batch(k1, k2, 32, 32),
+            medium=make_batch(k3, k4, 64, 64),
+            large=make_batch(k5, k6, 224, 224),
         )
 
 
