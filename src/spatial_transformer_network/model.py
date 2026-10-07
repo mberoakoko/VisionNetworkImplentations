@@ -1,10 +1,10 @@
 import equinox as eqx
 import jax
 import jax.numpy as jnp
-from jaxtyping import Array, Float
+from jaxtyping import Array, Float, PRNGKeyArray
 
 
-class SpatialTransformerNetwork(eqx.Module):
+class SpatialTranformer(eqx.Module):
     out_shape: tuple[int, int]
 
     def __init__(self, out_shape: tuple[int, int]):
