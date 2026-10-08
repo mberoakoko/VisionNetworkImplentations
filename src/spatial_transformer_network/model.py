@@ -56,6 +56,7 @@ class SpatialTransformerModule(eqx.Module):
     spatial_tranformer: SpatialTranformer
 
     def __init__(self, in_channels: int , out_shape: tuple[int, int], key: PRNGKeyArray):
+        k1, k2 = jax.random.split(key, 2)
         self.localisation_features = eqx.nn.Sequential(
             [
                 eqx.nn.Conv2d(in_channels, 8, kernel_size=3, stride=2, key=k1),
@@ -65,12 +66,12 @@ class SpatialTransformerModule(eqx.Module):
         )
 
         self.localisation_head = eqx.nn.Linear(8 * 13 * 13, 6, key=k2)
-        self.stn = SpatialTranformer(out_shape)
+        self.spatial_tranformer = SpatialTranformer(out_shape)
 
     def __call__(self, x: Array) -> Array:
         features = self.localisation_features(x).flatten()
         theta_flat = self.localization_head(features)
         theta = theta_flat.reshape(2, 3)
-        return self.stn(x, theta)
+        return self.spatial_tranformer(x, theta)
 
 
